@@ -102,12 +102,12 @@ def submit():
     c = conn.cursor()
     c.execute("INSERT INTO FN125Updates (PRJ_CD, SAM, EFF, SPC, FISH, Field2Change, Value2Update) VALUES (:PRJ_CD, :SAM, :EFF, :SPC, :FISH, :Field2Change, :Value2Update)",
         {
-            'PRJ_CD': prjcd.get(),
+            'PRJ_CD': prjcd.get().upper(),
             'SAM': sam.get(),
-            'EFF': eff.get(),
-            'SPC': spc.get(),
+            'EFF': eff.get().zfill(3),
+            'SPC': spc.get().zfill(3),
             'FISH': fish.get(),
-            'Field2Change': tabfield.get(),
+            'Field2Change': tabfield.get().upper(),
             'Value2Update': updateval.get()   
         }              
     )
