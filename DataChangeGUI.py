@@ -178,8 +178,7 @@ def submit(event = None):
 def delete_record():
     selected = my_tree.focus()
     values = my_tree.item(selected, 'values')
-    print(values)
-
+    
     x = my_tree.selection()[0]
     my_tree.delete(x)
     
