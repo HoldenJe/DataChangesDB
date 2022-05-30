@@ -11,12 +11,10 @@ from tkinter import *
 import sqlite3
 from tkinter import ttk
 from operator import itemgetter
-from tkinter import messagebox
 
 # build database
 conn = sqlite3.connect('update_data.db')
 c = conn.cursor()
-
 
 # Create FN025_update
 c.execute("""CREATE TABLE IF NOT EXISTS FN125Updates (
@@ -36,25 +34,32 @@ conn.commit()
 # close DB connection
 conn.close()
 
-
 # Create application window
 root = Tk()
 root.title('FN2 Error Log')
 root.iconbitmap("fishicon2.ico")
-root.geometry("600x500+10+10")
-
+root.geometry("500x500+10+10") # +10+10 indicates where it opens
 
 # Create layout
-frame_125 = LabelFrame(root, text = "FN125")
-frame_125.grid(row=1, column = 0, pady = 10, padx = 10)
+#version_frame = Frame(root).grid(row = 4)
+# version_label = LabelFrame(root, text = "version: 0.0.1.9002")
+version_label = Label(text = "version: 0.0.1.9002", justify=RIGHT).grid(row = 4, column = 1)
+message_text = StringVar()
+message_label = Label(textvariable = message_text, justify = RIGHT).grid(row = 4, column=0)
+# 
+entry_frame = Frame(version_label).grid(row = 2, column = 0)
 
-frame_controls = LabelFrame(root, text = "Controls")
-frame_controls.grid(row = 2, column = 0, pady = 5, padx = 5)
+# Entry window
+frame_125 = LabelFrame(entry_frame, text = "FN125")
+frame_125.grid(column = 0, row = 1, pady = 5, padx = 5)
+
+frame_controls = LabelFrame(entry_frame, text = "Controls")
+frame_controls.grid(row = 1, column = 1, pady = 1, padx = 1)
 
 # add treeview frame
 # Create Treeview Frame
-tree_frame = Frame(root)
-tree_frame.grid(row = 3, padx = 5, pady=5)
+tree_frame = LabelFrame(root, text = "Database records")
+tree_frame.grid(row = 3, column = 0, padx = 15, pady=5, columnspan=2)
 
 # Treeview Scrollbar
 tree_scroll = Scrollbar(tree_frame)
@@ -89,8 +94,8 @@ my_tree.heading("COLUMN", text="COLUMN", anchor=W)
 my_tree.heading("VALUE", text="VALUE", anchor=W)
 
 # labels and entry boxes
-prjcd = Entry(frame_125, width = 15)
-prjcd.grid(row = 1, column = 1)
+prjcd = Entry(frame_125, width = 13)
+prjcd.grid(row = 1, column = 1, padx = (0, 5))
 prjcd_label = Label(frame_125, text = "PRJ_CD (ex. LWA_IA15_051)")
 prjcd_label.grid(row = 1, column = 0)
 prjcd.insert(0, "lwa_ia22_000")
@@ -152,6 +157,8 @@ def clear_contents():
     tabfield.delete(0, END)
     updateval.delete(0, END)
     prjcd.focus_set()
+    message_text.set(" ")
+
 
 def submit(event = None):
     # Create db connection
@@ -173,6 +180,7 @@ def submit(event = None):
     conn.close()
     clear_contents()
     query_database()
+    message_text.set("New record was added to database")
 
 
 def delete_record():
@@ -190,7 +198,7 @@ def delete_record():
     conn.close()
     clear_contents()
     query_database()
-    messagebox.showinfo("Deleted!", "Your Record Has Been Deleted!")
+    message_text.set("Record was successfully deleted")
 
 
 # Create clear contents button
@@ -202,15 +210,15 @@ submit_btn.bind('<Return>', submit)
 #submit_btn['font'] = font.Font(size = 18)
 
 clear_btn = Button(frame_controls, text = "Clear Form", command = clear_contents)
-clear_btn.grid(row = 1, column = 2, pady = 5, padx = 5)
+clear_btn.grid(row = 2, column = 0, pady = 5, padx = 5)
 
 # delete a record
 delete_btn = Button(frame_controls, text = "Delete Record", command = delete_record)
-delete_btn.grid(row = 1, column=3, pady=5, padx=5)
+delete_btn.grid(row = 3, column=0, pady=5, padx=5)
 
 # Create exit button
 exit_btn = Button(frame_controls, text = "End Program", command = root.destroy)
-exit_btn.grid(row = 1, column = 4, pady = 5, padx = 5)
+exit_btn.grid(row = 4, column = 0, pady = 5, padx = 5)
 
 # also bind ctrl+q to quick exit
 def end_app(event):
