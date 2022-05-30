@@ -10,6 +10,8 @@ from tkinter import *
 #from tkinter import filedialog
 import sqlite3
 from tkinter import ttk
+from operator import itemgetter
+from tkinter import messagebox
 
 # build database
 conn = sqlite3.connect('update_data.db')
@@ -91,6 +93,7 @@ prjcd = Entry(frame_125, width = 15)
 prjcd.grid(row = 1, column = 1)
 prjcd_label = Label(frame_125, text = "PRJ_CD (ex. LWA_IA15_051)")
 prjcd_label.grid(row = 1, column = 0)
+prjcd.insert(0, "lwa_ia22_000")
 prjcd.focus_set()
 
 sam = Entry(frame_125, width = 5)
@@ -125,11 +128,17 @@ updateval_label.grid(row = 7, column = 0)
 
 # populate the tree view with data
 def query_database():
+    for record in my_tree.get_children():
+	    my_tree.delete(record)
+   
     conn = sqlite3.connect("update_data.db")
     c = conn.cursor()
     c.execute("SELECT * FROM FN125Updates")
     records = c.fetchall()
-    print(records)
+    #print(records)
+    records = sorted(records, key=itemgetter(0), reverse=TRUE)
+    #print(records)
+    
     for record in records:
         my_tree.insert(parent="", index = record[0],  values=(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7]))
 
@@ -144,7 +153,7 @@ def clear_contents():
     updateval.delete(0, END)
     prjcd.focus_set()
 
-def submit():
+def submit(event = None):
     # Create db connection
     conn = sqlite3.connect('update_data.db')
     c = conn.cursor()
@@ -165,22 +174,53 @@ def submit():
     clear_contents()
     query_database()
 
+
+def delete_record():
+    selected = my_tree.focus()
+    values = my_tree.item(selected, 'values')
+    print(values)
+
+    x = my_tree.selection()[0]
+    my_tree.delete(x)
+    
+    conn = sqlite3.connect('update_data.db')
+    c = conn.cursor()
+    c.execute("DELETE from FN125Updates WHERE ID=" + values[0])
+
+    conn.commit()
+    conn.close()
+    clear_contents()
+    query_database()
+    messagebox.showinfo("Deleted!", "Your Record Has Been Deleted!")
+
+
 # Create clear contents button
 # Create submit button
 submit_btn = Button(frame_controls, text = "Add Record", command = submit) 
 submit_btn.grid(row = 1, column = 0, pady = 5, padx = 5)
+submit_btn.bind('<Return>', submit)
+
 #submit_btn['font'] = font.Font(size = 18)
 
-clear_btn = Button(frame_controls, text = "Clear Contents", command = clear_contents)
+clear_btn = Button(frame_controls, text = "Clear Form", command = clear_contents)
 clear_btn.grid(row = 1, column = 2, pady = 5, padx = 5)
+
+# delete a record
+delete_btn = Button(frame_controls, text = "Delete Record", command = delete_record)
+delete_btn.grid(row = 1, column=3, pady=5, padx=5)
 
 # Create exit button
 exit_btn = Button(frame_controls, text = "End Program", command = root.destroy)
-exit_btn.grid(row = 1, column = 3, pady = 5, padx = 5)
-#exit_btn['font'] = font.Font(size = 14)
+exit_btn.grid(row = 1, column = 4, pady = 5, padx = 5)
 
-# for testing
-# query_database()
+# also bind ctrl+q to quick exit
+def end_app(event):
+    root.destroy()
+root.bind("<Control-q>", end_app)
+
+
+# required to fill treeview on start up
+query_database()
 
 # Runs the window
 root.mainloop()
