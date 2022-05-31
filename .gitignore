@@ -1,3 +1,7 @@
 # gitignore
 # ignore db file
 *.db
+
+# ignore files associated with the creation of exe file
+output/
+*.exe
