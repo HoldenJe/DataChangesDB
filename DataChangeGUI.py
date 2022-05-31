@@ -6,11 +6,8 @@ Create GUI for data entry in FCIN error database
 """
 # Import packages
 from tkinter import *
-#import tkinter.font as font
-#from tkinter import filedialog
 import sqlite3
 from tkinter import ttk
-from operator import itemgetter
 
 # build database
 conn = sqlite3.connect('update_data.db')
@@ -41,12 +38,9 @@ root.iconbitmap("fishicon2.ico")
 root.geometry("500x500+10+10") # +10+10 indicates where it opens
 
 # Create layout
-#version_frame = Frame(root).grid(row = 4)
-# version_label = LabelFrame(root, text = "version: 0.0.1.9002")
 version_label = Label(text = "version: 0.0.1.9002", justify=RIGHT).grid(row = 4, column = 1)
 message_text = StringVar()
 message_label = Label(textvariable = message_text, justify = RIGHT).grid(row = 4, column=0)
-# 
 entry_frame = Frame(version_label).grid(row = 2, column = 0)
 
 # Entry window
@@ -64,14 +58,17 @@ tree_frame.grid(row = 3, column = 0, padx = 15, pady=5, columnspan=2)
 # Treeview Scrollbar
 tree_scroll = Scrollbar(tree_frame)
 tree_scroll.pack(side=RIGHT, fill=Y)
+
 # Create Treeview
 my_tree = ttk.Treeview(tree_frame, yscrollcommand=tree_scroll.set, selectmode="browse")
+
 # Pack to the screen
 my_tree.pack()
 tree_scroll.config(command=my_tree.yview)
 
 # Define Our Columns
 my_tree['columns'] = ("ID", "PRJ_CD", "SAM", "EFF", "SPC", "FISH", "COLUMN", "VALUE")
+
 # Format Our Columns
 my_tree.column("#0", width=0, stretch=NO)
 my_tree.column("ID", anchor=W, width=25)
@@ -82,6 +79,7 @@ my_tree.column("SPC", anchor=W, width=50)
 my_tree.column("FISH", anchor=W, width=50)
 my_tree.column("COLUMN", anchor=W, width=60)
 my_tree.column("VALUE", anchor=W, width=50)
+
 # Create Headings 
 my_tree.heading("#0", text="", anchor=W)
 my_tree.heading("ID", text = "ID", anchor=W)
@@ -141,12 +139,8 @@ def query_database():
     c.execute("SELECT * FROM FN125Updates")
     records = c.fetchall()
     records.sort(reverse=True)
-    #print(records)
-    #records = sorted(records, key=itemgetter(0), reverse=TRUE)
-    #print(records)
-    for record in records:
-        print(record)
     
+    # counter required for proper indexing
     i=0
     for record in records:
         my_tree.insert("", index=i,  values=(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7]))
@@ -154,6 +148,7 @@ def query_database():
 
 # Clear, submit and exit buttons
 ## define command functions
+# clean contents will empty the entry boxes
 def clear_contents():
     sam.delete(0, END)
     eff.delete(0, END)
@@ -164,7 +159,7 @@ def clear_contents():
     prjcd.focus_set()
     message_text.set(" ")
 
-
+# submit writes the new data to the db
 def submit(event = None):
     # Create db connection
     conn = sqlite3.connect('update_data.db')
@@ -187,14 +182,19 @@ def submit(event = None):
     query_database()
     message_text.set("New record was added to database")
 
-
+# this will delete a record from the database and update treeview
 def delete_record():
+    # retrieves the index where treeview is focused
     selected = my_tree.focus()
+    
+    # retrieves the input values of selected
     values = my_tree.item(selected, 'values')
     
+    # gets the index and deletes it from the tree view
     x = my_tree.selection()[0]
     my_tree.delete(x)
     
+    # delete the record from the data
     conn = sqlite3.connect('update_data.db')
     c = conn.cursor()
     c.execute("DELETE from FN125Updates WHERE ID=" + values[0])
@@ -202,22 +202,24 @@ def delete_record():
     conn.commit()
     conn.close()
     clear_contents()
+    
+    # update treeview
     query_database()
+    
+    # provide confirmation message
     message_text.set("Record was successfully deleted")
 
 
-# Create clear contents button
 # Create submit button
 submit_btn = Button(frame_controls, text = "Add Record", command = submit) 
 submit_btn.grid(row = 1, column = 0, pady = 5, padx = 5)
 submit_btn.bind('<Return>', submit)
 
-#submit_btn['font'] = font.Font(size = 18)
-
+# Create clear contents button
 clear_btn = Button(frame_controls, text = "Clear Form", command = clear_contents)
 clear_btn.grid(row = 2, column = 0, pady = 5, padx = 5)
 
-# delete a record
+# delete a record button
 delete_btn = Button(frame_controls, text = "Delete Record", command = delete_record)
 delete_btn.grid(row = 3, column=0, pady=5, padx=5)
 
@@ -225,14 +227,15 @@ delete_btn.grid(row = 3, column=0, pady=5, padx=5)
 exit_btn = Button(frame_controls, text = "End Program", command = root.destroy)
 exit_btn.grid(row = 4, column = 0, pady = 5, padx = 5)
 
-# also bind ctrl+q to quick exit
+# bind ctrl+q to quick exit
 def end_app(event):
     root.destroy()
 root.bind("<Control-q>", end_app)
-
 
 # required to fill treeview on start up
 query_database()
 
 # Runs the window
 root.mainloop()
+
+# end
