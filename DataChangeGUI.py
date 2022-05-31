@@ -34,7 +34,7 @@ conn.close()
 # Create application window
 root = Tk()
 root.title('FN2 Error Log')
-root.iconbitmap("fishicon2.ico")
+# root.iconbitmap("fishicon2.ico")
 root.geometry("500x500+10+10") # +10+10 indicates where it opens
 
 # Create layout
