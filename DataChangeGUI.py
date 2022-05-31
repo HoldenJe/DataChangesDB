@@ -65,7 +65,7 @@ tree_frame.grid(row = 3, column = 0, padx = 15, pady=5, columnspan=2)
 tree_scroll = Scrollbar(tree_frame)
 tree_scroll.pack(side=RIGHT, fill=Y)
 # Create Treeview
-my_tree = ttk.Treeview(tree_frame, yscrollcommand=tree_scroll.set, selectmode="extended")
+my_tree = ttk.Treeview(tree_frame, yscrollcommand=tree_scroll.set, selectmode="browse")
 # Pack to the screen
 my_tree.pack()
 tree_scroll.config(command=my_tree.yview)
@@ -140,12 +140,17 @@ def query_database():
     c = conn.cursor()
     c.execute("SELECT * FROM FN125Updates")
     records = c.fetchall()
+    records.sort(reverse=True)
     #print(records)
-    records = sorted(records, key=itemgetter(0), reverse=TRUE)
+    #records = sorted(records, key=itemgetter(0), reverse=TRUE)
     #print(records)
-    
     for record in records:
-        my_tree.insert(parent="", index = record[0],  values=(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7]))
+        print(record)
+    
+    i=0
+    for record in records:
+        my_tree.insert("", index=i,  values=(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7]))
+        i+=1
 
 # Clear, submit and exit buttons
 ## define command functions
