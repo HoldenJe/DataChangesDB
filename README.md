@@ -1,8 +1,8 @@
 # Data Change Log Database GUI
-Author: Jeremy Holden
-Email: jeremy.holden@ontario.ca
-version: 0.0.1.9002
-version date: May 30, 2022
+Author: Jeremy Holden  
+Email: jeremy.holden@ontario.ca  
+version: 0.0.1.9002  
+version date: May 30, 2022  
 
 # Objective
 Create a lightweight sqlite data base with a tkinter GUI that is used to record required data changes to FN2 files. Changes are recorded in the data base and then in R a `rows_update()` applies the changes to the data along with additional cleaning and standardization routines. Changes are recorded in the database and will later be merged using R along with additional cleaning and standardization routines as the data are migrated to a long term storage system. In this manner, raw data can remain unchanged while creating a documented, reproducible pipeline of data changes. 
