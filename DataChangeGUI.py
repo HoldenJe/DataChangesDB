@@ -10,37 +10,64 @@ import sqlite3
 from tkinter import ttk
 from tkinter import filedialog as fd
 
+global dbfile 
+dbfile = FALSE
+
 # build database
-conn = sqlite3.connect(fd.askopenfilename())
-c = conn.cursor()
+def opennew():
+    global dbfile
+    new_db_file = fd.asksaveasfilename(defaultextension=".db")
+    if(new_db_file):
+        dbfile = new_db_file
+        conn = sqlite3.connect(dbfile)
+        c = conn.cursor()
+        # Create FN025_update
+        c.execute("""CREATE TABLE IF NOT EXISTS FN125Updates (
+            id INTEGER PRIMARY KEY,
+            PRJ_CD text,
+            SAM text,
+            EFF text,
+            SPC text,
+            FISH int,
+            Field2Change text,
+            Value2Update int   
+            ) """)
 
-# Create FN025_update
-c.execute("""CREATE TABLE IF NOT EXISTS FN125Updates (
-    id INTEGER PRIMARY KEY,
-    PRJ_CD text,
-    SAM text,
-    EFF text,
-    SPC text,
-    FISH int,
-    Field2Change text,
-    Value2Update int   
-    ) """)
+        # Do commit
+        conn.commit()
+        # close DB connection
+        conn.close()
+        bname = dbfile.split("/")
+        message_text.set("%s" % (dbname[-1]))
 
-# Do commit
-conn.commit()
-
-# close DB connection
-conn.close()
+def openexisting():
+    global dbfile
+    existing_db_file = fd.askopenfilename()
+    if existing_db_file:
+        dbfile = existing_db_file
+        conn = sqlite3.connect(dbfile)
+        c = conn.cursor()
+        query_database()
+        dbname = dbfile.split("/")
+        message_text.set("%s" % (dbname[-1]))
 
 # Create application window
 root = Tk()
 root.title('FN2 Error Log')
-# root.iconbitmap("fishicon2.ico")
 root.geometry("500x500+10+10") # +10+10 indicates where it opens
 
+# Create a Menu 
+my_menu = Menu(root)
+root.config(menu=my_menu)
+file_menu = Menu(my_menu, tearoff=False)
+my_menu.add_cascade(label = "File", menu=file_menu)
+file_menu.add_command(label = "New Database", command=opennew)
+file_menu.add_command(label = "Open Existing", command=openexisting)
+
 # Create layout
-version_label = Label(text = "version: 0.0.1.9002", justify=RIGHT).grid(row = 4, column = 1)
+version_label = Label(text = "version: 0.0.1.9003", justify=RIGHT).grid(row = 4, column = 1)
 message_text = StringVar()
+message_text.set("Use FILE menu to select a database")
 message_label = Label(textvariable = message_text, justify = RIGHT).grid(row = 4, column=0)
 entry_frame = Frame(version_label).grid(row = 2, column = 0)
 
@@ -135,7 +162,7 @@ def query_database():
     for record in my_tree.get_children():
 	    my_tree.delete(record)
    
-    conn = sqlite3.connect("update_data.db")
+    conn = sqlite3.connect(dbfile)
     c = conn.cursor()
     c.execute("SELECT * FROM FN125Updates")
     records = c.fetchall()
@@ -163,7 +190,7 @@ def clear_contents():
 # submit writes the new data to the db
 def submit(event = None):
     # Create db connection
-    conn = sqlite3.connect('update_data.db')
+    conn = sqlite3.connect(dbfile)
     c = conn.cursor()
     c.execute("INSERT INTO FN125Updates (PRJ_CD, SAM, EFF, SPC, FISH, Field2Change, Value2Update) VALUES (:PRJ_CD, :SAM, :EFF, :SPC, :FISH, :Field2Change, :Value2Update)",
         {
@@ -196,7 +223,8 @@ def delete_record():
     my_tree.delete(x)
     
     # delete the record from the data
-    conn = sqlite3.connect('update_data.db')
+    conn = sqlite3.connect(dbfile)
+    
     c = conn.cursor()
     c.execute("DELETE from FN125Updates WHERE ID=" + values[0])
 
@@ -234,7 +262,7 @@ def end_app(event):
 root.bind("<Control-q>", end_app)
 
 # required to fill treeview on start up
-query_database()
+# query_database()
 
 # Runs the window
 root.mainloop()
