@@ -2,13 +2,14 @@
 """
 Created on May 25, 2022
 Create GUI for data entry in FCIN error database
-@author: jeremy
+@author: J. Holden
 """
 # Import packages
 from tkinter import *
 import sqlite3
 from tkinter import ttk
 from tkinter import filedialog as fd
+from tkinter import messagebox
 
 global dbfile 
 dbfile = FALSE
@@ -37,7 +38,7 @@ def opennew():
         conn.commit()
         # close DB connection
         conn.close()
-        bname = dbfile.split("/")
+        dbname = dbfile.split("/")
         message_text.set("%s" % (dbname[-1]))
 
 def openexisting():
@@ -51,6 +52,9 @@ def openexisting():
         dbname = dbfile.split("/")
         message_text.set("%s" % (dbname[-1]))
 
+def show_version():
+    response = messagebox.showinfo("Version", "Version: 0.0.1.9003\nCreated by J. Holden")
+    
 # Create application window
 root = Tk()
 root.title('FN2 Error Log')
@@ -63,13 +67,19 @@ file_menu = Menu(my_menu, tearoff=False)
 my_menu.add_cascade(label = "File", menu=file_menu)
 file_menu.add_command(label = "New Database", command=opennew)
 file_menu.add_command(label = "Open Existing", command=openexisting)
+file_menu.add_command(label = "Quit (ctrl+q)", command = root.quit)
+about_menu = Menu(my_menu, tearoff=False)
+my_menu.add_cascade(label="About", menu=about_menu)
+about_menu.add_command(label = "Version Info", command = show_version)
 
 # Create layout
-version_label = Label(text = "version: 0.0.1.9003", justify=RIGHT).grid(row = 4, column = 1)
+# version_label = Label(text = "version: 0.0.1.9003", justify=RIGHT).grid(row = 4, column = 1)
 message_text = StringVar()
 message_text.set("Use FILE menu to select a database")
-message_label = Label(textvariable = message_text, justify = RIGHT).grid(row = 4, column=0)
-entry_frame = Frame(version_label).grid(row = 2, column = 0)
+
+entry_frame = Frame(root).grid(row = 2, column = 0)
+# message_frame = LabelFrame(root, text = "Messages").grid(column=0, row=4)
+message_label = Label(textvariable = message_text).grid(row = 4, column=0)
 
 # Entry window
 frame_125 = LabelFrame(entry_frame, text = "FN125")
@@ -161,7 +171,7 @@ updateval_label.grid(row = 7, column = 0)
 def query_database():
     for record in my_tree.get_children():
 	    my_tree.delete(record)
-   
+        
     conn = sqlite3.connect(dbfile)
     c = conn.cursor()
     c.execute("SELECT * FROM FN125Updates")
@@ -253,8 +263,8 @@ delete_btn = Button(frame_controls, text = "Delete Record", command = delete_rec
 delete_btn.grid(row = 3, column=0, pady=5, padx=5)
 
 # Create exit button
-exit_btn = Button(frame_controls, text = "End Program", command = root.destroy)
-exit_btn.grid(row = 4, column = 0, pady = 5, padx = 5)
+# exit_btn = Button(frame_controls, text = "End Program", command = root.destroy)
+# exit_btn.grid(row = 4, column = 0, pady = 5, padx = 5)
 
 # bind ctrl+q to quick exit
 def end_app(event):
