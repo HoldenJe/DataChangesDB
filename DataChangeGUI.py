@@ -8,9 +8,10 @@ Create GUI for data entry in FCIN error database
 from tkinter import *
 import sqlite3
 from tkinter import ttk
+from tkinter import filedialog as fd
 
 # build database
-conn = sqlite3.connect('update_data.db')
+conn = sqlite3.connect(fd.askopenfilename())
 c = conn.cursor()
 
 # Create FN025_update
