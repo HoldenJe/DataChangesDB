@@ -40,6 +40,8 @@ def opennew():
         conn.close()
         dbname = dbfile.split("/")
         message_text.set("%s" % (dbname[-1]))
+        query_database()
+        prjcd.delete(0, END)
 
 def openexisting():
     global dbfile
@@ -51,6 +53,10 @@ def openexisting():
         query_database()
         dbname = dbfile.split("/")
         message_text.set("%s" % (dbname[-1]))
+        c.execute("SELECT PRJ_CD FROM FN125Updates")
+        myprjcd = (c.fetchall())[0]
+        prjcd.delete(0, END)
+        prjcd.insert(0, *myprjcd)
 
 def show_version():
     response = messagebox.showinfo("Version", "Version: 0.0.1.9003\nCreated by J. Holden")
