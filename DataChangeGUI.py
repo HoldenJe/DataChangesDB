@@ -50,6 +50,17 @@ def openexisting():
         dbfile = existing_db_file
         conn = sqlite3.connect(dbfile)
         c = conn.cursor()
+        c.execute("""CREATE TABLE IF NOT EXISTS FN125Updates (
+            id INTEGER PRIMARY KEY,
+            PRJ_CD text,
+            SAM text,
+            EFF text,
+            SPC text,
+            FISH int,
+            Field2Change text,
+            Value2Update int  
+            ) """)
+        conn.commit()
         query_database()
         dbname = dbfile.split("/")
         message_text.set("%s" % (dbname[-1]))
@@ -59,7 +70,7 @@ def openexisting():
         prjcd.insert(0, *myprjcd)
 
 def show_version():
-    response = messagebox.showinfo("Version", "Version: 0.0.1.9003\nCreated by J. Holden")
+    response = messagebox.showinfo("Version", "Version: 0.0.1.9004\nCreated by J. Holden")
     
 # Create application window
 root = Tk()
