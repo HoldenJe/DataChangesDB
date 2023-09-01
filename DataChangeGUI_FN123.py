@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Aug 28, 2023 - started as a copy of DataChangeGUI.py
+Created on Aug 28, 2023
 Create GUI for data entry in FCIN error database
 @author: J. Holden
 """
@@ -22,14 +22,16 @@ def opennew():
         dbfile = new_db_file
         conn = sqlite3.connect(dbfile)
         c = conn.cursor()
-        # Create FN121_update
-        c.execute("""CREATE TABLE IF NOT EXISTS FN121Updates (
+        # Create FN023_update
+        c.execute("""CREATE TABLE IF NOT EXISTS FN123Updates (
             id INTEGER PRIMARY KEY,
             PRJ_CD text,
             SAM text,
+            EFF text,
+            SPC text,
             Field2Change text,
             Value2Update int,
-            COMMENT text   
+            COMMENT text      
             ) """)
 
         # Do commit
@@ -48,19 +50,21 @@ def openexisting():
         dbfile = existing_db_file
         conn = sqlite3.connect(dbfile)
         c = conn.cursor()
-        c.execute("""CREATE TABLE IF NOT EXISTS FN121Updates (
+        c.execute("""CREATE TABLE IF NOT EXISTS FN123Updates (
             id INTEGER PRIMARY KEY,
             PRJ_CD text,
             SAM text,
+            EFF text,
+            SPC text,
             Field2Change text,
             Value2Update int,
-            COMMENT text   
+            COMMENT text     
             ) """)
         conn.commit()
         query_database()
         dbname = dbfile.split("/")
         message_text.set("%s" % (dbname[-1]))
-        c.execute("SELECT PRJ_CD FROM FN121Updates")
+        c.execute("SELECT PRJ_CD FROM FN123Updates")
         myprjcd = (c.fetchall())[0]
         prjcd.delete(0, END)
         prjcd.insert(0, *myprjcd)
@@ -70,7 +74,7 @@ def show_version():
     
 # Create application window
 root = Tk()
-root.title('FN2 FN121 Error Log')
+root.title('FN2 Error Log')
 root.geometry("700x500+10+10") # +10+10 indicates where it opens
 
 # Create a Menu 
@@ -86,7 +90,7 @@ my_menu.add_cascade(label="About", menu=about_menu)
 about_menu.add_command(label = "Version Info", command = show_version)
 
 # Create layout
-# version_label = Label(text = "version: 0.0.1.9004", justify=RIGHT).grid(row = 4, column = 1)
+# version_label = Label(text = "version: 0.0.1.9003", justify=RIGHT).grid(row = 4, column = 1)
 message_text = StringVar()
 message_text.set("Use FILE menu to select a database")
 
@@ -95,8 +99,8 @@ entry_frame = Frame(root).grid(row = 2, column = 0)
 message_label = Label(textvariable = message_text).grid(row = 4, column=0)
 
 # Entry window
-frame_121 = LabelFrame(entry_frame, text = "FN121")
-frame_121.grid(column = 0, row = 1, pady = 5, padx = 5)
+frame_123 = LabelFrame(entry_frame, text = "FN123")
+frame_123.grid(column = 0, row = 1, pady = 5, padx = 5)
 
 frame_controls = LabelFrame(entry_frame, text = "Controls")
 frame_controls.grid(row = 1, column = 1, pady = 1, padx = 1)
@@ -118,15 +122,17 @@ my_tree.pack()
 tree_scroll.config(command=my_tree.yview)
 
 # Define Our Columns
-my_tree['columns'] = ("ID", "PRJ_CD", "SAM", "COLUMN", "VALUE", "COMMENT")
+my_tree['columns'] = ("ID", "PRJ_CD", "SAM", "EFF", "SPC", "COLUMN", "VALUE", "COMMENT")
 
 # Format Our Columns
 my_tree.column("#0", width=0, stretch=NO)
 my_tree.column("ID", anchor=W, width=25)
 my_tree.column("PRJ_CD", anchor=W, width=100)
 my_tree.column("SAM", anchor=W, width=50)
-my_tree.column("COLUMN", anchor=W, width=100)
-my_tree.column("VALUE", anchor=W, width=100)
+my_tree.column("EFF", anchor=W, width=50)
+my_tree.column("SPC", anchor=W, width=50)
+my_tree.column("COLUMN", anchor=W, width=60)
+my_tree.column("VALUE", anchor=W, width=50)
 my_tree.column("COMMENT", anchor=W, width = 200)
 
 # Create Headings 
@@ -134,36 +140,48 @@ my_tree.heading("#0", text="", anchor=W)
 my_tree.heading("ID", text = "ID", anchor=W)
 my_tree.heading("PRJ_CD", text="PRJ_CD", anchor=W)
 my_tree.heading("SAM", text="SAM", anchor=W)
+my_tree.heading("EFF", text="EFF", anchor=W)
+my_tree.heading("SPC", text="SPC", anchor=W)
 my_tree.heading("COLUMN", text="COLUMN", anchor=W)
 my_tree.heading("VALUE", text="VALUE", anchor=W)
 my_tree.heading("COMMENT", text = "COMMENT", anchor=W)
 
 # labels and entry boxes
-prjcd = Entry(frame_121, width = 13)
+prjcd = Entry(frame_123, width = 13)
 prjcd.grid(row = 1, column = 1, padx = (0, 5))
-prjcd_label = Label(frame_121, text = "PRJ_CD (ex. LWA_IA15_051)")
+prjcd_label = Label(frame_123, text = "PRJ_CD (ex. LWA_IA15_051)")
 prjcd_label.grid(row = 1, column = 0)
 prjcd.insert(0, "lwa_ia22_000")
 prjcd.focus_set()
 
-sam = Entry(frame_121, width = 5)
+sam = Entry(frame_123, width = 5)
 sam.grid(row = 2, column = 1)
-sam_label = Label(frame_121, text = "SAM")
+sam_label = Label(frame_123, text = "SAM")
 sam_label.grid(row = 2, column = 0)
 
-tabfield = Entry(frame_121, width = 10)
-tabfield.grid(row = 3, column = 1)
-tabfield_label = Label(frame_121, text = "Field to replace (ex. EFFDT0)")
-tabfield_label.grid(row = 3, column = 0)
+eff = Entry(frame_123, width = 5)
+eff.grid(row = 3, column = 1)
+eff_label = Label(frame_123, text = "EFF (ex. 038)")
+eff_label.grid(row = 3, column = 0)
 
-updateval = Entry(frame_121, width = 10)
-updateval.grid(row = 4, column = 1)
-updateval_label = Label(frame_121, text = "Corrected value (ex. 1997-07-10)")
-updateval_label.grid(row = 4, column = 0)
+spc = Entry(frame_123, width = 5)
+spc.grid(row = 4, column = 1)
+spc_label = Label(frame_123, text = "SPC (ex. 081)")
+spc_label.grid(row = 4, column = 0)
 
-usercomment = Entry(frame_121, width = 15)
+tabfield = Entry(frame_123, width = 10)
+tabfield.grid(row = 6, column = 1)
+tabfield_label = Label(frame_123, text = "Field to replace (ex. CATCNT)")
+tabfield_label.grid(row = 6, column = 0)
+
+updateval = Entry(frame_123, width = 5)
+updateval.grid(row = 7, column = 1)
+updateval_label = Label(frame_123, text = "Corrected value")
+updateval_label.grid(row = 7, column = 0)
+
+usercomment = Entry(frame_123, width = 15)
 usercomment.grid(row = 8, column = 1, pady=(0, 5), padx=5)
-usercomment_label = Label(frame_121, text = "Comment")
+usercomment_label = Label(frame_123, text = "Comment")
 usercomment_label.grid(row = 8, column = 0)
 
 # populate the tree view with data
@@ -173,14 +191,14 @@ def query_database():
         
     conn = sqlite3.connect(dbfile)
     c = conn.cursor()
-    c.execute("SELECT * FROM FN121Updates")
+    c.execute("SELECT * FROM FN123Updates")
     records = c.fetchall()
     records.sort(reverse=True)
     
     # counter required for proper indexing
     i=0
     for record in records:
-        my_tree.insert("", index=i,  values=(record[0], record[1], record[2], record[3], record[4], record[5]))
+        my_tree.insert("", index=i,  values=(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7]))
         i+=1
 
 # Clear, submit and exit buttons
@@ -188,6 +206,8 @@ def query_database():
 # clean contents will empty the entry boxes
 def clear_contents():
     sam.delete(0, END)
+    eff.delete(0, END)
+    spc.delete(0, END)
     tabfield.delete(0, END)
     updateval.delete(0, END)
     usercomment.delete(0,END)
@@ -199,10 +219,12 @@ def submit(event = None):
     # Create db connection
     conn = sqlite3.connect(dbfile)
     c = conn.cursor()
-    c.execute("INSERT INTO FN121Updates (PRJ_CD, SAM, Field2Change, Value2Update, COMMENT) VALUES (:PRJ_CD, :SAM, :Field2Change, :Value2Update, :COMMENT)",
+    c.execute("INSERT INTO FN123Updates (PRJ_CD, SAM, EFF, SPC, Field2Change, Value2Update, COMMENT) VALUES (:PRJ_CD, :SAM, :EFF, :SPC, :Field2Change, :Value2Update, :COMMENT)",
         {
             'PRJ_CD': prjcd.get().upper(),
             'SAM': sam.get(),
+            'EFF': eff.get().zfill(3),
+            'SPC': spc.get().zfill(3),
             'Field2Change': tabfield.get().upper(),
             'Value2Update': updateval.get(),
             'COMMENT': usercomment.get()   
@@ -231,7 +253,7 @@ def delete_record():
     conn = sqlite3.connect(dbfile)
     
     c = conn.cursor()
-    c.execute("DELETE from FN121Updates WHERE ID=" + values[0])
+    c.execute("DELETE from FN123Updates WHERE ID=" + values[0])
 
     conn.commit()
     conn.close()

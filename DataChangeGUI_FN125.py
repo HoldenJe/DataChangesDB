@@ -31,7 +31,8 @@ def opennew():
             SPC text,
             FISH int,
             Field2Change text,
-            Value2Update int   
+            Value2Update int,
+            COMMENT text   
             ) """)
 
         # Do commit
@@ -58,7 +59,8 @@ def openexisting():
             SPC text,
             FISH int,
             Field2Change text,
-            Value2Update int  
+            Value2Update int,
+            COMMENT text     
             ) """)
         conn.commit()
         query_database()
@@ -75,7 +77,7 @@ def show_version():
 # Create application window
 root = Tk()
 root.title('FN2 Error Log')
-root.geometry("500x500+10+10") # +10+10 indicates where it opens
+root.geometry("700x500+10+10") # +10+10 indicates where it opens
 
 # Create a Menu 
 my_menu = Menu(root)
@@ -122,7 +124,7 @@ my_tree.pack()
 tree_scroll.config(command=my_tree.yview)
 
 # Define Our Columns
-my_tree['columns'] = ("ID", "PRJ_CD", "SAM", "EFF", "SPC", "FISH", "COLUMN", "VALUE")
+my_tree['columns'] = ("ID", "PRJ_CD", "SAM", "EFF", "SPC", "FISH", "COLUMN", "VALUE", "COMMENT")
 
 # Format Our Columns
 my_tree.column("#0", width=0, stretch=NO)
@@ -134,7 +136,7 @@ my_tree.column("SPC", anchor=W, width=50)
 my_tree.column("FISH", anchor=W, width=50)
 my_tree.column("COLUMN", anchor=W, width=60)
 my_tree.column("VALUE", anchor=W, width=50)
-
+my_tree.column("COMMENT", anchor=W, width = 200)
 # Create Headings 
 my_tree.heading("#0", text="", anchor=W)
 my_tree.heading("ID", text = "ID", anchor=W)
@@ -145,6 +147,7 @@ my_tree.heading("SPC", text="SPC", anchor=W)
 my_tree.heading("FISH", text="FISH", anchor=W)
 my_tree.heading("COLUMN", text="COLUMN", anchor=W)
 my_tree.heading("VALUE", text="VALUE", anchor=W)
+my_tree.heading("COMMENT", text = "COMMENT", anchor=W)
 
 # labels and entry boxes
 prjcd = Entry(frame_125, width = 13)
@@ -184,6 +187,11 @@ updateval.grid(row = 7, column = 1)
 updateval_label = Label(frame_125, text = "Corrected value")
 updateval_label.grid(row = 7, column = 0)
 
+usercomment = Entry(frame_125, width = 15)
+usercomment.grid(row = 8, column = 1, pady=(0, 5), padx=5)
+usercomment_label = Label(frame_125, text = "Comment")
+usercomment_label.grid(row = 8, column = 0)
+
 # populate the tree view with data
 def query_database():
     for record in my_tree.get_children():
@@ -198,7 +206,7 @@ def query_database():
     # counter required for proper indexing
     i=0
     for record in records:
-        my_tree.insert("", index=i,  values=(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7]))
+        my_tree.insert("", index=i,  values=(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7], record[8]))
         i+=1
 
 # Clear, submit and exit buttons
@@ -211,6 +219,7 @@ def clear_contents():
     fish.delete(0,END)
     tabfield.delete(0, END)
     updateval.delete(0, END)
+    usercomment.delete(0,END)
     prjcd.focus_set()
     message_text.set(" ")
 
@@ -219,7 +228,7 @@ def submit(event = None):
     # Create db connection
     conn = sqlite3.connect(dbfile)
     c = conn.cursor()
-    c.execute("INSERT INTO FN125Updates (PRJ_CD, SAM, EFF, SPC, FISH, Field2Change, Value2Update) VALUES (:PRJ_CD, :SAM, :EFF, :SPC, :FISH, :Field2Change, :Value2Update)",
+    c.execute("INSERT INTO FN125Updates (PRJ_CD, SAM, EFF, SPC, FISH, Field2Change, Value2Update, COMMENT) VALUES (:PRJ_CD, :SAM, :EFF, :SPC, :FISH, :Field2Change, :Value2Update, :COMMENT)",
         {
             'PRJ_CD': prjcd.get().upper(),
             'SAM': sam.get(),
@@ -227,7 +236,8 @@ def submit(event = None):
             'SPC': spc.get().zfill(3),
             'FISH': fish.get(),
             'Field2Change': tabfield.get().upper(),
-            'Value2Update': updateval.get()   
+            'Value2Update': updateval.get(),
+            'COMMENT': usercomment.get()   
         }              
     )
     # Close cursor
